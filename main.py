@@ -1,20 +1,20 @@
 import matplotlib
 
 import pandas as pd
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 matplotlib.use('Agg')  # Fix für SSH
 
 
 class Parameters:
-    NUMER_OF_AGENTS = 100  # Größe der Population
-    NUMBER_OF_ITERATIONS = 200  # Jahre, welche simuliert werden sollen
+    NUMER_OF_AGENTS = 100  # Größe der Anfangs-Population
+    NUMBER_OF_ITERATIONS = 400  # Jahre, welche simuliert werden sollen
     SPAWN_DEVIL = 10  # Spawn Wahrscheinlichkeit von "Devils" in %
     SPAWN_ANGEL = 10  # Spawn Wahrscheinlichkeit von "Angels" in %
     FITNESS_REGENERATION_RATE = 0.05  # Fitness Regeneration
     DISASTER_PROBABILITY = 1  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
     FERTILITY = 1.2  # Fruchtbarkeitsrate
-    SEED = 42  # Zufallsseed
+    SEED = 42  # Zufallsseed, gleichlassen für Vergleichbarkeit
 
 
 if __name__ == '__main__':
@@ -25,16 +25,22 @@ if __name__ == '__main__':
     from models.basic_model import ExampleModel
 
     model = ExampleModel(parameters)
-    for i in tqdm(range(parameters.NUMBER_OF_ITERATIONS)):
-        model.step()
-        df_results = df_results.append({'year': model.get_time(), 'population': model.schedule.get_agent_count(),
-                                        'median_age': model.get_median_age(),
-                                        'median_fitness': model.get_median_fitness(),
-                                        'children_per_woman': model.children_per_woman(),
-                                        'net_growth': model.get_net_grow(), 'devil_fitness': model.get_devil_fitness(),
-                                        'angel_fitness': model.get_angel_fitness(),
-                                        'population_angels': model.get_angels(),
-                                        'population_devils': model.get_devils()}, ignore_index=True)
+
+    # Model wird ausgeführt
+    with trange(parameters.NUMBER_OF_ITERATIONS) as t:
+        for i in t:
+            model.step()
+            t.set_description('YEAR %i' % model.get_time())
+            t.set_postfix(population=str(model.schedule.get_agent_count()))
+            df_results = df_results.append({'year': model.get_time(), 'population': model.schedule.get_agent_count(),
+                                            'median_age': model.get_median_age(),
+                                            'median_fitness': model.get_median_fitness(),
+                                            'children_per_woman': model.children_per_woman(),
+                                            'net_growth': model.get_net_grow(),
+                                            'devil_fitness': model.get_devil_fitness(),
+                                            'angel_fitness': model.get_angel_fitness(),
+                                            'population_angels': model.get_angels(),
+                                            'population_devils': model.get_devils()}, ignore_index=True)
 
     print(df_results[['population_angels', 'population_devils', 'population']])
 
