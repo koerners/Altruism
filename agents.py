@@ -15,13 +15,14 @@ class Person(Agent):
         self.children = []  # Die eigenen Kinder
         self.parents = []  # Die eigenen Eltern
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
+        self.parameters = self.model.parameters
 
     def step(self):
         """
         Wird jeden Tick aufgerufen
         """
         self.life_cycle()
-        if self.random.randint(0, 100) == 1:
+        if self.random.randint(0, 100) < self.parameters.DISASTER_PROBABILITY:
             # Zufällig wird die Option gegeben altruistisch zu handeln
             self.altruistic_act()
 
@@ -30,11 +31,15 @@ class Person(Agent):
         Altern, sterben und Fortpflanzen
         """
         self.age = self.age + 1
-        if self.age > self.life_expectancy or self.random.randint(0, 1000) < 5 or self.fitness < 0:
+
+        self.fitness = self.fitness + (
+                    self.parameters.FITNESS_REGENERATION_RATE / self.age)  # Fitness wird regeneriert. Wirklich gute Idee?
+
+        if self.age > self.life_expectancy or self.fitness < 0 or self.random.randint(0, 1000) < 1:
             # Wenn die Lebenserwartung erreicht ist, man Pech hat, oder die Fitness unter 0 sinkt
             self.die()
 
-        if 40 > self.age > 18 and (self.random.randint(0, 1000) < (1.2 * self.fitness)):
+        if 40 > self.age > 18 and (self.random.randint(0, 1000) < (self.parameters.FERTILITY * self.fitness)):
             # Basierend auf dem Alter, einem Zufallswert und der eigenen Fitness kann sich fortgepflanzt werden
             self.find_partner()
             self.reproduce()
@@ -74,12 +79,6 @@ class Person(Agent):
         :return: Child
         """
         # TODO: Was sinnvolleres
-
-        if isinstance(self, Devil) or isinstance(self.partner, Devil):
-            return Devil(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
-
-        if isinstance(self, Angel) or isinstance(self.partner, Angel):
-            return Angel(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
         return Person(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
@@ -121,6 +120,9 @@ class Angel(Person):
     def altruism_check(self, needs_help, cost):
         return True
 
+    def create_child(self):
+        return Angel(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+
 
 class Devil(Person):
     """
@@ -132,3 +134,6 @@ class Devil(Person):
 
     def altruism_check(self, needs_help, cost):
         return False
+
+    def create_child(self):
+        return Devil(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)

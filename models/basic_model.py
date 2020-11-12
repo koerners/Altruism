@@ -2,10 +2,11 @@ from mesa import Model, Agent
 from mesa.time import RandomActivation, BaseScheduler
 
 from agents import Person, Angel, Devil
+from main import Parameters
 
 
 class ExampleModel(Model):
-    def __init__(self, n_agents, seed=42):
+    def __init__(self, parameters: Parameters):
         super().__init__()
         self.schedule = BaseScheduler(self)
         self.ready_to_mate = []
@@ -18,17 +19,38 @@ class ExampleModel(Model):
         self.birthrate = None
         self.angels = None
         self.devils = None
+        self.parameters = parameters
 
-        self.reset_randomizer(seed=seed)  # Zufallsseed
+        self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
-        for i in range(n_agents):
-            if self.random.randint(0, 100) < 10:
-                # Mit einer x% Chance spawnt ein spezieller Charakter
-                a = self.random.choice([Angel(i, self), Devil(i, self)])
-            else:
-                # Sonst wird eine normale Person hinzugefügt
-                a = Person(i, self)
-            self.schedule.add(a)
+        # Initiale Agenten werden angelegt
+        self.initial_agents = []
+        i = 0
+        while len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+            # Mit einer x% Chance spawnt ein spezieller Charakter
+            rand = self.random.randint(0, 100)
+            appended = False
+
+            if rand < self.parameters.SPAWN_DEVIL and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+                a = Devil(i, self)
+                self.initial_agents.append(a)
+                i += 1
+                appended = True
+
+            if rand < self.parameters.SPAWN_ANGEL and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+                b = Angel(i, self)
+                self.initial_agents.append(b)
+                i += 1
+
+                appended = True
+
+            if not appended and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+                c = Person(i, self)
+                self.initial_agents.append(c)
+                i += 1
+
+        for agent in self.initial_agents:
+            self.schedule.add(agent)
 
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
@@ -129,4 +151,4 @@ class ExampleModel(Model):
         return self.angels
 
     def get_devils(self):
-        return self.angels
+        return self.devils
