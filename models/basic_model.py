@@ -26,25 +26,25 @@ class ExampleModel(Model):
         # Initiale Agenten werden angelegt
         self.initial_agents = []
         i = 0
-        while len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+        while len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
             # Mit einer x% Chance spawnt ein spezieller Charakter
             rand = self.random.randint(0, 100)
             appended = False
 
-            if rand < self.parameters.SPAWN_DEVIL and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+            if rand < self.parameters.SPAWN_DEVIL and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
                 a = Devil(i, self)
                 self.initial_agents.append(a)
                 i += 1
                 appended = True
 
-            if rand < self.parameters.SPAWN_ANGEL and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+            if rand < self.parameters.SPAWN_ANGEL and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
                 b = Angel(i, self)
                 self.initial_agents.append(b)
                 i += 1
 
                 appended = True
 
-            if not appended and len(self.initial_agents) < self.parameters.NUMER_OF_AGENTS:
+            if not appended and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
                 c = Person(i, self)
                 self.initial_agents.append(c)
                 i += 1

@@ -1,19 +1,29 @@
 import matplotlib
-
 import pandas as pd
-from tqdm import tqdm, trange
+from tqdm import trange
 
 matplotlib.use('Agg')  # Fix für SSH
 
 
+def get_params(input_class):
+    """
+    Helfermethode um die Attribute einer Klasse speichern zu können
+    """
+    attrs = {}
+    for attr, value in input_class.__dict__.items():
+        if not "__" in attr:
+            attrs.update({attr: value})
+    return pd.DataFrame(attrs, index=[0])
+
+
 class Parameters:
-    NUMER_OF_AGENTS = 100  # Größe der Anfangs-Population
-    NUMBER_OF_ITERATIONS = 400  # Jahre, welche simuliert werden sollen
+    NUMBER_OF_AGENTS = 100  # Größe der Anfangs-Population
+    NUMBER_OF_ITERATIONS = 500  # Jahre, welche simuliert werden sollen
     SPAWN_DEVIL = 10  # Spawn Wahrscheinlichkeit von "Devils" in %
     SPAWN_ANGEL = 10  # Spawn Wahrscheinlichkeit von "Angels" in %
-    FITNESS_REGENERATION_RATE = 0.05  # Fitness Regeneration
-    DISASTER_PROBABILITY = 1  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
-    FERTILITY = 1.2  # Fruchtbarkeitsrate
+    FITNESS_REGENERATION_RATE = 0.05  # Fitness Regenerationsrate (wird durch Alter geteilt)
+    DISASTER_PROBABILITY = 2  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
+    FERTILITY = 1.1  # Fruchtbarkeitsrate
     SEED = 42  # Zufallsseed, gleichlassen für Vergleichbarkeit
 
 
@@ -22,6 +32,7 @@ if __name__ == '__main__':
     parameters = Parameters()
 
     df_results = pd.DataFrame()  # Data Frame, in dem die Ergebisse kummuliert werden
+
     from models.basic_model import ExampleModel
 
     model = ExampleModel(parameters)
@@ -48,13 +59,16 @@ if __name__ == '__main__':
         x='year').get_figure()
     fig_fitness = df_results[['year', 'devil_fitness', 'angel_fitness', 'median_fitness']].plot(
         x='year').get_figure()
-    fig_growth = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
+    fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
+    fig_age = df_results[['year', 'median_age']].plot(x='year').get_figure()
 
     fig_population.savefig('./out/population.png')
     fig_fitness.savefig('./out/fitness.png')
-    fig_growth.savefig('./out/fig_growth.png')
-    df_results.to_json("./out/results.json")
+    fig_birthrate.savefig('./out/birthrate.png')
+    fig_age.savefig('./out/avg_age.png')
+    df_results.to_json("./out/results.json", orient="records")
+    get_params(Parameters).to_json("./out/params.json", orient="records")
 
     # Wegkommentieren, wenn SSH
     # fig_population.show()
-    # fig_age_fitness.show()
+    # fig_fitness.show()
