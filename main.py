@@ -1,4 +1,7 @@
 from models.basic_model import ExampleModel
+import matplotlib
+
+matplotlib.use('Agg')
 import pandas as pd
 from tqdm import tqdm
 
