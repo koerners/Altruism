@@ -10,7 +10,7 @@ class Person(Agent):
             self.age = age
 
         self.gender = self.random.choice(["m", "f"])  # Geschlecht
-        self.life_expectancy = self.random.randint(60, 100)  # Lebenserwartung
+        self.life_expectancy = self.random.randint(70, 100)  # Lebenserwartung
         self.partner = None  # Der eigene Partner
         self.children = []  # Die eigenen Kinder
         self.parents = []  # Die eigenen Eltern
@@ -41,6 +41,7 @@ class Person(Agent):
 
     def die(self):
         # Sterben
+        self.model.net_grow = self.model.net_grow - 1
         self.model.schedule.remove(self)
 
     def find_partner(self):
@@ -60,11 +61,27 @@ class Person(Agent):
         Ein Kind wird gezeugt und der Simulation hinzugefügt
         """
         if self.partner is not None:
-            child = Person(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+            child = self.create_child()
             child.parents = [self, self.partner]
             self.children.append(child)
             self.partner.children.append(child)
+            self.model.net_grow = self.model.net_grow + 1
             self.model.schedule.add(child)
+
+    def create_child(self):
+        """
+        Vererbungsstrategie Devil / Angel / "Normal"
+        :return: Child
+        """
+        # TODO: Was sinnvolleres
+
+        if isinstance(self, Devil) or isinstance(self.partner, Devil):
+            return Devil(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+
+        if isinstance(self, Angel) or isinstance(self.partner, Angel):
+            return Angel(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+
+        return Person(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
     def altruistic_act(self):
         """
@@ -73,8 +90,9 @@ class Person(Agent):
         """
         if len(self.model.schedule.agents) < 2:
             return
-        needs_help = self.random.choice(self.model.schedule.agents)
-        cost = self.random.randint(1, 10)
+
+        needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige Person
+        cost = self.random.randint(1, 10)  # Kosten für einen selbst
         if self.altruism_check(needs_help, cost) and self != needs_help:
             self.fitness = self.fitness - cost
             needs_help.fitness = needs_help.fitness + cost
@@ -88,17 +106,17 @@ class Person(Agent):
         :param cost: Kosten
         :return: True oder False
         """
-        # TODO: Sinnvolle Implementierung basierend auf dem Verwandschaftsgrad
+        # TODO: Sinnvolle Implementierung basierend z.B. auf dem Verwandschaftsgrad
         return self.random.choice([True, False])
 
 
 class Angel(Person):
     """
-    Eine durchweg ltruistisch handelnde Person
+    Eine durchweg altruistisch handelnde Person
     """
 
-    def __init__(self, unique_id, model, age=None):
-        super().__init__(unique_id, model, age=age)
+    def __init__(self, unique_id, model, age=None, fitness=100):
+        super().__init__(unique_id, model, age=age, fitness=fitness)
 
     def altruism_check(self, needs_help, cost):
         return True
@@ -109,8 +127,8 @@ class Devil(Person):
     Eine durchweg egoistisch handelnde Person
     """
 
-    def __init__(self, unique_id, model, age=None):
-        super().__init__(unique_id, model, age=age)
+    def __init__(self, unique_id, model, age=None, fitness=100):
+        super().__init__(unique_id, model, age=age, fitness=fitness)
 
     def altruism_check(self, needs_help, cost):
         return False
