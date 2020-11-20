@@ -106,7 +106,7 @@ class Person(Agent):
         needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige Person
         cost = self.random.randint(1, 10)  # Kosten für einen selbst
         if self.altruism_check(needs_help, cost) and self != needs_help:
-            self.fitness = self.fitness - cost * 0.8
+            self.fitness = self.fitness - cost * self.parameters.COST_REDUCTION_ALTRUISTIC_ACT
             needs_help.fitness = needs_help.fitness + cost
 
     def altruism_check(self, needs_help, cost):

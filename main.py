@@ -24,6 +24,7 @@ class Parameters:
     FITNESS_REGENERATION_RATE = 0  # Fitness Regenerationsrate (wird durch Alter geteilt)
     DISASTER_PROBABILITY = 2.5  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
     FERTILITY = 2 # Fruchtbarkeitsrate
+    COST_REDUCTION_ALTRUISTIC_ACT = 0.8  # Anteil der Punkte, welche man selbst verliert wenn man altruistisch handelt
     SEED = 256  # Zufallsseed, gleichlassen für Vergleichbarkeit
 
 
