@@ -18,13 +18,13 @@ def get_params(input_class):
 
 class Parameters:
     NUMBER_OF_AGENTS = 100  # Größe der Anfangs-Population
-    NUMBER_OF_ITERATIONS = 500  # Jahre, welche simuliert werden sollen
+    NUMBER_OF_ITERATIONS = 300  # Jahre, welche simuliert werden sollen
     SPAWN_DEVIL = 10  # Spawn Wahrscheinlichkeit von "Devils" in %
     SPAWN_ANGEL = 10  # Spawn Wahrscheinlichkeit von "Angels" in %
-    FITNESS_REGENERATION_RATE = 0.05  # Fitness Regenerationsrate (wird durch Alter geteilt)
-    DISASTER_PROBABILITY = 2  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
-    FERTILITY = 1.1  # Fruchtbarkeitsrate
-    SEED = 42  # Zufallsseed, gleichlassen für Vergleichbarkeit
+    FITNESS_REGENERATION_RATE = 0  # Fitness Regenerationsrate (wird durch Alter geteilt)
+    DISASTER_PROBABILITY = 2.5  # Prozentuale Chance, dass ein altruistisches Handeln nötig ist
+    FERTILITY = 2 # Fruchtbarkeitsrate
+    SEED = 256  # Zufallsseed, gleichlassen für Vergleichbarkeit
 
 
 if __name__ == '__main__':
