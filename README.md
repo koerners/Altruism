@@ -12,6 +12,16 @@ python3 main.py
 ```
 Die Ergebnisse befinden sich in /out/
 
+
+## Visualisierung
+Eine Live Visualisierung befindet sich in der Testphase.
+Getestet werden kann diese mit
+````
+python3 server.py
+````
+Wenn man nun auf die angezeigte URL (meist http://127.0.0.1:5000/) wechselt, kann der Verlauf live verfolgt werden.
+
+
 ## Aufbau
 ### main.py
 In main.py wird das Modell durchlaufen sowie die Daten gesammelt und visualisiert.

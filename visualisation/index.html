@@ -1,0 +1,198 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta content="" name="description">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+    <meta content="" property="og:title">
+    <meta content="" property="og:type">
+    <meta content="" property="og:url">
+    <meta content="" property="og:image">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta content="#fafafa" name="theme-color">
+</head>
+
+<body>
+
+
+<div class="container" id="cont" style="width: 100%; min-height: 500px">
+    <div class="row">
+        <h1>Simulation</h1>
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <div id="debug"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <div id="my_dataviz"></div>
+        </div>
+
+    </div>
+
+    <div class="row">
+          <button class="btn waves-effect waves-light" type="submit" name="action" onclick="start()">Start Simulation
+    <i class="material-icons right">send</i>
+  </button>
+    </div>
+</div>
+
+
+
+
+<script>
+
+
+    function start(){
+            $.get("http://127.0.0.1:5000/start", function (data) {
+
+    });
+
+    }
+
+
+
+
+var graph_div = document.getElementById("cont");
+var margin = {top: 10, right: 30, bottom: 30, left: 30},
+    width = graph_div.clientWidth - margin.left - margin.right,
+    height = graph_div.clientHeight - margin.top - margin.bottom;
+
+
+var svg = d3.select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+
+var x = d3.scaleLinear()
+    .domain([0, 200])
+    .range([0, width]);
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+// Add Y axis
+var y = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height, 0]);
+svg.append("g")
+    .call(d3.axisLeft(y));
+
+// Add a tooltip div. Here I define the general feature of the tooltip: stuff that do not depend on the data point.
+// Its opacity is set to 0: we don't see it by default.
+var tooltip = d3.select("#my_dataviz")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("width", "200px")
+
+
+function draw() {
+    d3.json("http://127.0.0.1:5000/agents").then(function (data) {
+        console.log(data)
+        svg.selectAll("circle").remove();
+        // Add X axis
+        // append the svg object to the body of the page
+
+        // A function that change this tooltip when the user hover a point.
+        // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
+        var mouseover = function (d) {
+            tooltip
+                .style("opacity", 1)
+        }
+
+        var mousemove = function (d) {
+            tooltip
+                .html("Class: " + d.originalTarget.__data__.class + "<br> Fitness: " + d.originalTarget.__data__.fitness + "<br> Age: " + d.originalTarget.__data__.age)
+            console.log(d.originalTarget.__data__)
+        }
+
+        // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
+        var mouseleave = function (d) {
+            tooltip
+                .transition()
+                .duration(200)
+                .style("opacity", 0)
+        }
+
+
+        // Add dots
+        svg.append('g')
+            .selectAll("dot")
+            .data(data) // the .filter part is just to keep a few dots on the chart, not all of them
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) {
+                return x(d.fitness);
+            })
+            .attr("cy", function (d) {
+                return y(d.age);
+            })
+            .attr("age", function (d) {
+                return d.age;
+            })
+            .attr("r", 6)
+            .style("fill", function (d) {
+                switch (d.class) {
+                    case "Person":
+                        return '#5ed2ab'
+                    case "Devil":
+                        return '#ec2b09'
+
+                    case "Angel":
+                        return '#0027ff'
+
+                    default:
+                        return '#949494'
+
+                }
+            })
+            .style("opacity", 0.3)
+            .style("stroke", "white")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave)
+
+    });
+
+}
+
+
+function loadInfo() {
+    $.get("http://127.0.0.1:5000/current", function (data) {
+        $("#debug").html(JSON.stringify(data[0]));
+    });
+}
+
+draw();
+loadInfo();
+window.setInterval(function () {
+    draw();
+    loadInfo();
+
+}, 1000);
+</script>
+</body>
+
+</html>

@@ -86,7 +86,7 @@ class Person(Agent):
         else:
             stronger = self.partner
 
-        # stronger = self.random.choice([self, self.partner])
+        stronger = self.random.choice([self, self.partner])
 
         if isinstance(stronger, Devil):
             return Devil(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
