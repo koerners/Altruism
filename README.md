@@ -12,6 +12,12 @@ python3 main.py
 ```
 Die Ergebnisse befinden sich in /out/
 
+Soll eine Live Visualisierung gezeigt werden, in main.py den Parameter
+````
+run_sim(server=True)
+````
+setzten.
+
 ## Aufbau
 ### main.py
 In main.py wird das Modell durchlaufen sowie die Daten gesammelt und visualisiert.
