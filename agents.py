@@ -17,10 +17,27 @@ class Person(Agent):
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
 
+    def get_neighbours(self):
+        neighbors = []
+        x, y = self.pos
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                neighbors.append((x + dx, y + dy))
+
+    def move(self):
+        possible_steps = self.model.grid.get_neighborhood(
+            self.pos,
+            moore=True,
+            include_center=False)
+        new_position = self.random.choice(possible_steps)
+        self.model.grid.move_agent(self, new_position)
+
     def step(self):
         """
         Wird jeden Tick aufgerufen
         """
+        if self.pos is not None:
+            self.move()
         self.life_cycle()
         if self.random.randint(0, 1000) < self.parameters.DISASTER_PROBABILITY * 10:
             # Zufällig wird die Option gegeben altruistisch zu handeln
@@ -48,6 +65,9 @@ class Person(Agent):
         # Sterben
         self.model.net_grow = self.model.net_grow - 1
         self.model.schedule.remove(self)
+        if self.pos is not None:
+            self.model.grid.remove_agent(self)
+
 
     def find_partner(self):
         if self.partner is None:
@@ -74,6 +94,9 @@ class Person(Agent):
                 self.partner.children.append(child)
                 self.model.net_grow = self.model.net_grow + 1
                 self.model.schedule.add(child)
+                x = self.random.randrange(self.model.grid.width)
+                y = self.random.randrange(self.model.grid.height)
+                self.model.grid.place_agent(self, (x, y))
 
     def create_child(self):
         """

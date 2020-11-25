@@ -1,10 +1,10 @@
 from mesa import Model, Agent
+from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation, BaseScheduler
 
 from agents import Person, Angel, Devil
 from main import Parameters
-
-
+from mesa.space import MultiGrid
 class ExampleModel(Model):
     def __init__(self, parameters: Parameters):
         super().__init__()
@@ -20,8 +20,20 @@ class ExampleModel(Model):
         self.angels = None
         self.devils = None
         self.parameters = parameters
+        self.population = 0
+        self.datacollector_a_d = DataCollector(
+            model_reporters={"Angels": "angels", "Devils": "devils"})
+        self.datacollector_fitness = DataCollector(
+            model_reporters={"Fitness": "average_fitness", "Angels": "angel_fitness", "Devils": "devil_fitness"})
+        self.datacollector_birthrate = DataCollector(
+            model_reporters={"Birthrate": "birthrate"})
+        self.datacollector_population = DataCollector(
+            model_reporters={"Population": "population"})
+
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
+
+        self.grid = MultiGrid(100, 100, True)
 
         # Initiale Agenten werden angelegt
         self.initial_agents = []
@@ -51,9 +63,13 @@ class ExampleModel(Model):
 
         for agent in self.initial_agents:
             self.schedule.add(agent)
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.grid.place_agent(agent, (x, y))
 
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
+
         self.ready_to_mate = []
         self.net_grow = 0
         self.average_age = None
@@ -63,9 +79,15 @@ class ExampleModel(Model):
         self.birthrate = None
         self.angels = None
         self.devils = None
-
+        self.population = len(self.schedule.agents)
         self.schedule.step()
         self.calculate_statistics()
+        self.datacollector_a_d.collect(self)
+        self.datacollector_fitness.collect(self)
+        self.datacollector_birthrate.collect(self)
+        self.datacollector_population.collect(self)
+
+
 
     def calculate_statistics(self):
         """
