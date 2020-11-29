@@ -88,10 +88,12 @@ def run_sim(server=False):
 
         print(df_results[['population_angels', 'population_devils', 'population']])
 
-        gini = model.datacollector.get_model_vars_dataframe()
-        print(gini)
+        #gini = model.datacollector_a_d.get_model_vars_dataframe()
+        #print(gini)
 
         fig_population = df_results[['year', 'population', 'population_angels', 'population_devils']].plot(
+            x='year').get_figure()
+        fig_angel_devil = df_results[['year', 'population_angels', 'population_devils']].plot(
             x='year').get_figure()
         fig_fitness = df_results[['year', 'devil_fitness', 'angel_fitness', 'median_fitness']].plot(
             x='year').get_figure()
@@ -99,6 +101,7 @@ def run_sim(server=False):
         fig_age = df_results[['year', 'median_age']].plot(x='year').get_figure()
 
         fig_population.savefig('./out/population.png')
+        fig_angel_devil.savefig('./out/angel_devil.png')
         fig_fitness.savefig('./out/fitness.png')
         fig_birthrate.savefig('./out/birthrate.png')
         fig_age.savefig('./out/avg_age.png')
