@@ -1,12 +1,25 @@
 import matplotlib
 import pandas as pd
 from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.modules import CanvasGrid, ChartModule
+from mesa.visualization.modules import CanvasGrid, ChartModule, TextElement
 from tqdm import trange
 
 from agents import Devil, Angel
 
 matplotlib.use('Agg')  # Fix für SSH
+
+
+class ParamsElement(TextElement):
+    def __init__(self):
+
+        super().__init__()
+
+
+    def render(self, model):
+        from main import Parameters
+        params = get_params(Parameters)
+
+        return params.T.to_html()
 
 
 def get_params(input_class):
@@ -29,7 +42,6 @@ def run_sim(server=False):
 
     from models.basic_model import ExampleModel
 
-    model = ExampleModel(parameters)
     if server:
         def agent_portrayal(agent):
             portrayal = {"Shape": "circle",
@@ -61,13 +73,17 @@ def run_sim(server=False):
                              data_collector_name='datacollector_population')
 
         grid = CanvasGrid(agent_portrayal, 100, 100, 600, 600)
+
+        params = ParamsElement()
         server = ModularServer(ExampleModel,
-                               [grid, chart, chart2, chart3, chart4],
-                               "Altriusm Model",
+                               [params, grid, chart, chart2, chart3, chart4],
+                               "Altruism Model",
                                {"parameters": parameters})
+
         server.port = 8521  # The default
         server.launch()
     else:
+        model = ExampleModel(parameters)
 
         # Model wird ausgeführt
         with trange(parameters.NUMBER_OF_ITERATIONS) as t:
@@ -88,9 +104,6 @@ def run_sim(server=False):
 
         print(df_results[['population_angels', 'population_devils', 'population']])
 
-        #gini = model.datacollector_a_d.get_model_vars_dataframe()
-        #print(gini)
-
         fig_population = df_results[['year', 'population', 'population_angels', 'population_devils']].plot(
             x='year').get_figure()
         fig_angel_devil = df_results[['year', 'population_angels', 'population_devils']].plot(
@@ -107,4 +120,3 @@ def run_sim(server=False):
         fig_age.savefig('./out/avg_age.png')
         df_results.to_json("./out/results.json", orient="records")
         get_params(Parameters).to_json("./out/params.json", orient="records")
-

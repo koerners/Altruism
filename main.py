@@ -14,4 +14,4 @@ class Parameters:
 
 
 if __name__ == '__main__':
-    run_sim(server=False)
+    run_sim(server=True)
