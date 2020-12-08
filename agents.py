@@ -2,7 +2,7 @@ from mesa import Agent
 
 
 class Person(Agent):
-    def __init__(self, unique_id, model, age=None, fitness=100):
+    def __init__(self, unique_id, model, age=None, fitness=100, altruistic_acts_agent=0):
         super().__init__(unique_id, model)
         if age is None:
             self.age = self.random.randint(0, 60)  # Für die Initialbevölkerung wird zufällig das Alter bestimmt
@@ -16,6 +16,7 @@ class Person(Agent):
         self.parents = []  # Die eigenen Eltern
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
+        self.altruistic_acts_agent = altruistic_acts_agent
 
     def get_neighbours(self):
         neighbors = []
@@ -131,6 +132,7 @@ class Person(Agent):
         if self.altruism_check(needs_help, cost) and self != needs_help:
             self.fitness = self.fitness - cost * self.parameters.COST_REDUCTION_ALTRUISTIC_ACT
             needs_help.fitness = needs_help.fitness + cost
+            self.altruistic_acts_agent += 1
 
     def altruism_check(self, needs_help, cost):
         """

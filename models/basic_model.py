@@ -16,9 +16,11 @@ class ExampleModel(Model):
         self.average_fitness = None
         self.devil_fitness = None
         self.angel_fitness = None
+        self.person_fitness = None
         self.birthrate = None
         self.angels = None
         self.devils = None
+        self.persons = None
         self.parameters = parameters
         self.population = 0
         self.datacollector_a_d = DataCollector(
@@ -29,7 +31,9 @@ class ExampleModel(Model):
             model_reporters={"Birthrate": "birthrate"})
         self.datacollector_population = DataCollector(
             model_reporters={"Population": "population"})
-
+        
+        self.altruistic_acts_angels = 0
+        self.altruistic_acts_persons = 0
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
@@ -76,9 +80,11 @@ class ExampleModel(Model):
         self.average_fitness = None
         self.devil_fitness = None
         self.angel_fitness = None
+        self.person_fitness = None
         self.birthrate = None
         self.angels = None
         self.devils = None
+        self.persons = None
         self.population = len(self.schedule.agents)
         self.schedule.step()
         self.calculate_statistics()
@@ -98,8 +104,10 @@ class ExampleModel(Model):
             age = 0
             devil_fitness = 0
             angel_fitness = 0
+            person_fitness = 0
             angels = 0
             devils = 0
+            persons = 0
             fitness = 0
             woman = 0
             children = 0
@@ -111,11 +119,18 @@ class ExampleModel(Model):
                 if isinstance(agent, Angel):
                     angel_fitness += agent.fitness
                     angels = angels + 1
+                    self.altruistic_acts_angels += agent.altruistic_acts_agent
+                if isinstance(agent, Person):
+                    person_fitness += agent.fitness
+                    persons = persons + 1
+                    self.altruistic_acts_persons += agent.altruistic_acts_agent
                 fitness += agent.fitness
 
                 if agent.gender == "f":
                     children += len(agent.children)
                     woman = woman + 1
+                
+                #self.altruistic_acts += agent.altruistic_acts_agent
 
             self.average_age = age / len(self.schedule.agents)
             self.average_fitness = fitness / len(self.schedule.agents)
@@ -123,6 +138,8 @@ class ExampleModel(Model):
                 self.devil_fitness = devil_fitness / devils
             if angels > 0:
                 self.angel_fitness = angel_fitness / angels
+            
+            self.person_fitness = person_fitness / persons
             if woman > 0:
                 self.birthrate = children / woman
 
@@ -158,6 +175,13 @@ class ExampleModel(Model):
         :return: Durschnittsfitness oder None
         """
         return self.angel_fitness
+    
+    def get_person_fitness(self):
+        """
+        Berechnet die Durschnittsfitness der persons
+        :return: Durschnittsfitness oder None
+        """
+        return self.person_fitness
 
     def children_per_woman(self):
         """
@@ -174,3 +198,9 @@ class ExampleModel(Model):
 
     def get_devils(self):
         return self.devils
+
+    def get_altruistic_acts_angels(self):
+        return self.altruistic_acts_angels
+    
+    def get_altruistic_acts_persons(self):
+        return self.altruistic_acts_persons

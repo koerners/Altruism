@@ -55,7 +55,7 @@ def run_sim(server=False):
             if isinstance(agent, Angel):
                 portrayal["Color"] = "grey"
             return portrayal
-
+        
         chart = ChartModule([{"Label": "Angels",
                               "Color": "Blue"}, {"Label": "Devils",
                                                  "Color": "Red"}],
@@ -99,8 +99,11 @@ def run_sim(server=False):
                      'net_growth': model.get_net_grow(),
                      'devil_fitness': model.get_devil_fitness(),
                      'angel_fitness': model.get_angel_fitness(),
+                     'person_fitness': model.get_person_fitness(),
                      'population_angels': model.get_angels(),
-                     'population_devils': model.get_devils()}, ignore_index=True)
+                     'population_devils': model.get_devils(),
+                     'altruistic_acts_angels': model.get_altruistic_acts_angels(),
+                     'altruistic_acts_persons': model.get_altruistic_acts_persons()}, ignore_index=True)
 
         print(df_results[['population_angels', 'population_devils', 'population']])
 
@@ -108,15 +111,17 @@ def run_sim(server=False):
             x='year').get_figure()
         fig_angel_devil = df_results[['year', 'population_angels', 'population_devils']].plot(
             x='year').get_figure()
-        fig_fitness = df_results[['year', 'devil_fitness', 'angel_fitness', 'median_fitness']].plot(
+        fig_fitness = df_results[['year', 'devil_fitness', 'angel_fitness', 'person_fitness']].plot(
             x='year').get_figure()
         fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
         fig_age = df_results[['year', 'median_age']].plot(x='year').get_figure()
+        fig_altruistic_acts = df_results[['year', 'altruistic_acts_angels', 'altruistic_acts_persons']].plot(x='year').get_figure()
 
         fig_population.savefig('./out/population.png')
         fig_angel_devil.savefig('./out/angel_devil.png')
         fig_fitness.savefig('./out/fitness.png')
         fig_birthrate.savefig('./out/birthrate.png')
         fig_age.savefig('./out/avg_age.png')
+        fig_altruistic_acts.savefig('./out/altruistic_acts.png')
         df_results.to_json("./out/results.json", orient="records")
         get_params(Parameters).to_json("./out/params.json", orient="records")
