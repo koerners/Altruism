@@ -53,11 +53,11 @@ def run_sim(server=False):
             if isinstance(agent, Devil):
                 portrayal["Color"] = "red"
             if isinstance(agent, Angel):
-                portrayal["Color"] = "grey"
+                portrayal["Color"] = "green"
             return portrayal
 
         chart = ChartModule([{"Label": "Angels",
-                              "Color": "Blue"}, {"Label": "Devils",
+                              "Color": "Green"}, {"Label": "Devils",
                                                  "Color": "Red"}],
                             data_collector_name='datacollector_a_d')
         chart2 = ChartModule([{"Label": "Fitness",
