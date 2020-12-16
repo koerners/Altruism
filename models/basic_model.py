@@ -2,7 +2,7 @@ from mesa import Model, Agent
 from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation, BaseScheduler
 
-from agents import Person, Angel, Devil
+from agents import BaseAgent, Altruist, NonAltruist
 from main import Parameters
 from mesa.space import MultiGrid
 class ExampleModel(Model):
@@ -14,17 +14,17 @@ class ExampleModel(Model):
         self.net_grow = None
         self.average_age = None
         self.average_fitness = None
-        self.devil_fitness = None
-        self.angel_fitness = None
+        self.nonAltruist_fitness = None
+        self.altruist_fitness = None
         self.birthrate = None
-        self.angels = None
-        self.devils = None
+        self.altruists = None
+        self.nonAltruists = None
         self.parameters = parameters
         self.population = 0
         self.datacollector_a_d = DataCollector(
-            model_reporters={"Angels": "angels", "Devils": "devils"})
+            model_reporters={"Altruists": "altruists", "NonAltruists": "nonAltruists"})
         self.datacollector_fitness = DataCollector(
-            model_reporters={"Fitness": "average_fitness", "Angels": "angel_fitness", "Devils": "devil_fitness"})
+            model_reporters={"Fitness": "average_fitness", "Altruists": "altruist_fitness", "NonAltruists": "nonAltruist_fitness"})
         self.datacollector_birthrate = DataCollector(
             model_reporters={"Birthrate": "birthrate"})
         self.datacollector_population = DataCollector(
@@ -35,7 +35,7 @@ class ExampleModel(Model):
 
         self.grid = MultiGrid(100, 100, True)
 
-        # Initiale Agenten werden angelegt
+        # Initiale Agenten werden altruistegt
         self.initial_agents = []
         i = 0
         while len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
@@ -43,21 +43,21 @@ class ExampleModel(Model):
             rand = self.random.randint(0, 100)
             appended = False
 
-            if rand < self.parameters.SPAWN_DEVIL and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
-                a = Devil(i, self)
+            if rand < self.parameters.SPAWN_NONALTRUIST and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
+                a = NonAltruist(i, self)
                 self.initial_agents.append(a)
                 i += 1
                 appended = True
 
-            if rand < self.parameters.SPAWN_ANGEL and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
-                b = Angel(i, self)
+            if rand < self.parameters.SPAWN_ALTRUIST and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
+                b = Altruist(i, self)
                 self.initial_agents.append(b)
                 i += 1
 
                 appended = True
 
             if not appended and len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
-                c = Person(i, self)
+                c = BaseAgent(i, self)
                 self.initial_agents.append(c)
                 i += 1
 
@@ -74,11 +74,11 @@ class ExampleModel(Model):
         self.net_grow = 0
         self.average_age = None
         self.average_fitness = None
-        self.devil_fitness = None
-        self.angel_fitness = None
+        self.nonAltruist_fitness = None
+        self.altruist_fitness = None
         self.birthrate = None
-        self.angels = None
-        self.devils = None
+        self.altruists = None
+        self.nonAltruists = None
         self.population = len(self.schedule.agents)
         self.schedule.step()
         self.calculate_statistics()
@@ -96,21 +96,21 @@ class ExampleModel(Model):
         if len(self.schedule.agents) > 0:
 
             age = 0
-            devil_fitness = 0
-            angel_fitness = 0
-            angels = 0
-            devils = 0
+            nonAltruist_fitness = 0
+            altruist_fitness = 0
+            altruists = 0
+            nonAltruists = 0
             fitness = 0
             woman = 0
             children = 0
             for agent in self.schedule.agents:
                 age += agent.age
-                if isinstance(agent, Devil):
-                    devil_fitness += agent.fitness
-                    devils = devils + 1
-                if isinstance(agent, Angel):
-                    angel_fitness += agent.fitness
-                    angels = angels + 1
+                if isinstance(agent, NonAltruist):
+                    nonAltruist_fitness += agent.fitness
+                    nonAltruists = nonAltruists + 1
+                if isinstance(agent, Altruist):
+                    altruist_fitness += agent.fitness
+                    altruists = altruists + 1
                 fitness += agent.fitness
 
                 if agent.gender == "f":
@@ -119,15 +119,15 @@ class ExampleModel(Model):
 
             self.average_age = age / len(self.schedule.agents)
             self.average_fitness = fitness / len(self.schedule.agents)
-            if devils > 0:
-                self.devil_fitness = devil_fitness / devils
-            if angels > 0:
-                self.angel_fitness = angel_fitness / angels
+            if nonAltruists > 0:
+                self.nonAltruist_fitness = nonAltruist_fitness / nonAltruists
+            if altruists > 0:
+                self.altruist_fitness = altruist_fitness / altruists
             if woman > 0:
                 self.birthrate = children / woman
 
-            self.devils = devils
-            self.angels = angels
+            self.nonAltruists = nonAltruists
+            self.altruists = altruists
 
     def get_time(self):
         """
@@ -145,19 +145,19 @@ class ExampleModel(Model):
         """
         return self.average_fitness
 
-    def get_devil_fitness(self):
+    def get_nonAltruist_fitness(self):
         """
-        Berechnet die Durschnittsfitness der devils
+        Berechnet die Durschnittsfitness der nonAltruists
         :return: Durschnittsfitness oder None
         """
-        return self.devil_fitness
+        return self.nonAltruist_fitness
 
-    def get_angel_fitness(self):
+    def get_altruist_fitness(self):
         """
-        Berechnet die Durschnittsfitness der angels
+        Berechnet die Durschnittsfitness der altruists
         :return: Durschnittsfitness oder None
         """
-        return self.angel_fitness
+        return self.altruist_fitness
 
     def children_per_woman(self):
         """
@@ -169,8 +169,8 @@ class ExampleModel(Model):
     def get_net_grow(self):
         return self.net_grow
 
-    def get_angels(self):
-        return self.angels
+    def get_altruists(self):
+        return self.altruists
 
-    def get_devils(self):
-        return self.devils
+    def get_nonAltruists(self):
+        return self.nonAltruists

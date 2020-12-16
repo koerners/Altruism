@@ -29,6 +29,6 @@ In der Klasse Parameters können die Simualtionsparameter gesetzt werden.
  
 ### agents.py
 In agents.py werden die einzelnen Agenten definiert.
-- Person(): "Normalo", Grundgerüst für alle Unterklassen. Implementiert lifecycle().
-- Devil(): Eine durchweg egostisch handelnde Person
-- Angel(): Eine durchweg altruistisch handelnde Person
+- BaseAgent(): "Normalo", Grundgerüst für alle Unterklassen. Implementiert lifecycle().
+- NonAltruist(): Eine durchweg egostisch handelnde BaseAgent
+- Altruist(): Eine durchweg altruistisch handelnde BaseAgent

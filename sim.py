@@ -4,7 +4,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule, TextElement
 from tqdm import trange
 
-from agents import Devil, Angel
+from agents import NonAltruist, Altruist
 
 matplotlib.use('Agg')  # Fix für SSH
 
@@ -50,19 +50,19 @@ def run_sim(server=False):
                          "Color": "blue",
                          "r": 0.5}
 
-            if isinstance(agent, Devil):
+            if isinstance(agent, NonAltruist):
                 portrayal["Color"] = "red"
-            if isinstance(agent, Angel):
+            if isinstance(agent, Altruist):
                 portrayal["Color"] = "green"
             return portrayal
 
-        chart = ChartModule([{"Label": "Angels",
-                              "Color": "Green"}, {"Label": "Devils",
+        chart = ChartModule([{"Label": "Altruists",
+                              "Color": "Green"}, {"Label": "NonAltruists",
                                                  "Color": "Red"}],
                             data_collector_name='datacollector_a_d')
         chart2 = ChartModule([{"Label": "Fitness",
-                               "Color": "Blue"}, {"Label": "Angels",
-                                                  "Color": "Green"}, {"Label": "Devils",
+                               "Color": "Blue"}, {"Label": "Altruists",
+                                                  "Color": "Green"}, {"Label": "NonAltruists",
                                                                       "Color": "Red"}],
                              data_collector_name='datacollector_fitness')
         chart3 = ChartModule([{"Label": "Birthrate",
@@ -97,24 +97,24 @@ def run_sim(server=False):
                      'median_fitness': model.get_median_fitness(),
                      'children_per_woman': model.children_per_woman(),
                      'net_growth': model.get_net_grow(),
-                     'devil_fitness': model.get_devil_fitness(),
-                     'angel_fitness': model.get_angel_fitness(),
-                     'population_angels': model.get_angels(),
-                     'population_devils': model.get_devils()}, ignore_index=True)
+                     'nonAltruist_fitness': model.get_nonAltruist_fitness(),
+                     'altruist_fitness': model.get_altruist_fitness(),
+                     'population_altruists': model.get_altruists(),
+                     'population_nonAltruists': model.get_nonAltruists()}, ignore_index=True)
 
-        print(df_results[['population_angels', 'population_devils', 'population']])
+        print(df_results[['population_altruists', 'population_nonAltruists', 'population']])
 
-        fig_population = df_results[['year', 'population', 'population_angels', 'population_devils']].plot(
+        fig_population = df_results[['year', 'population', 'population_altruists', 'population_nonAltruists']].plot(
             x='year').get_figure()
-        fig_angel_devil = df_results[['year', 'population_angels', 'population_devils']].plot(
+        fig_altruist_nonAltruist = df_results[['year', 'population_altruists', 'population_nonAltruists']].plot(
             x='year').get_figure()
-        fig_fitness = df_results[['year', 'devil_fitness', 'angel_fitness', 'median_fitness']].plot(
+        fig_fitness = df_results[['year', 'nonAltruist_fitness', 'altruist_fitness', 'median_fitness']].plot(
             x='year').get_figure()
         fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
         fig_age = df_results[['year', 'median_age']].plot(x='year').get_figure()
 
         fig_population.savefig('./out/population.png')
-        fig_angel_devil.savefig('./out/angel_devil.png')
+        fig_altruist_nonAltruist.savefig('./out/altruist_nonAltruist.png')
         fig_fitness.savefig('./out/fitness.png')
         fig_birthrate.savefig('./out/birthrate.png')
         fig_age.savefig('./out/avg_age.png')

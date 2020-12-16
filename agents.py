@@ -1,7 +1,7 @@
 from mesa import Agent
 
 
-class Person(Agent):
+class BaseAgent(Agent):
     def __init__(self, unique_id, model, age=None, fitness=100):
         super().__init__(unique_id, model)
         if age is None:
@@ -75,7 +75,8 @@ class Person(Agent):
             self.model.ready_to_mate.append(self)
             # TODO: Partner mit ähnlicher Fitness und evtl Alter
             for potential_partner in self.model.ready_to_mate:
-                if potential_partner.gender != self.gender:
+                #if potential_partner.gender != self.gender:
+                if potential_partner != self:
                     self.partner = potential_partner
                     potential_partner.partner = self
                     self.model.ready_to_mate.remove(self)
@@ -100,23 +101,28 @@ class Person(Agent):
 
     def create_child(self):
         """
-        Vererbungsstrategie Devil / Angel / "Normal"
+        Vererbungsstrategie NonAltruist / Altruist / "Normal"
         :return: Child
         """
-
+        # To DO: Mutation einbauen
+        """
         if self.fitness > self.partner.fitness:
             stronger = self
         else:
             stronger = self.partner
+        """
 
-        # stronger = self.random.choice([self, self.partner])
+        if self.random.randint(0, 100) <= self.parameters.MUTATION_RATE:
+            trait_to_inherit = self.random.choice([Altruist, NonAltruist, BaseAgent])
+        else:
+            trait_to_inherit = self.random.choice([self, self.partner])
 
-        if isinstance(stronger, Devil):
-            return Devil(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
-        if isinstance(stronger, Angel):
-            return Angel(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+        if isinstance(trait_to_inherit, NonAltruist):
+            return NonAltruist(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+        if isinstance(trait_to_inherit, Altruist):
+            return Altruist(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
-        return Person(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+        return BaseAgent(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
     def altruistic_act(self):
         """
@@ -126,7 +132,7 @@ class Person(Agent):
         if len(self.model.schedule.agents) < 2:
             return
 
-        needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige Person
+        needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige BaseAgent
         cost = self.random.randint(1, 10)  # Kosten für einen selbst
         if self.altruism_check(needs_help, cost) and self != needs_help:
             self.fitness = self.fitness - cost * self.parameters.COST_REDUCTION_ALTRUISTIC_ACT
@@ -141,15 +147,12 @@ class Person(Agent):
         """
         # TODO: Sinnvolle Implementierung basierend z.B. auf dem Verwandschaftsgrad
 
-        if self.fitness < needs_help.fitness:
-            return False
-
         return self.random.choice([True, False])
 
 
-class Angel(Person):
+class Altruist(BaseAgent):
     """
-    Eine durchweg altruistisch handelnde Person
+    Eine durchweg altruistisch handelnde BaseAgent
     """
 
     def __init__(self, unique_id, model, age=None, fitness=100):
@@ -159,9 +162,9 @@ class Angel(Person):
         return True
 
 
-class Devil(Person):
+class NonAltruist(BaseAgent):
     """
-    Eine durchweg egoistisch handelnde Person
+    Eine durchweg egoistisch handelnde BaseAgent
     """
 
     def __init__(self, unique_id, model, age=None, fitness=100):
