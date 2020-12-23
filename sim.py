@@ -100,7 +100,8 @@ def run_sim(server=False):
                      'population_altruists': model.get_altruists(),
                      'population_nonAltruists': model.get_nonAltruists(),
                      'altruistic_acts_altruists': model.get_altruistic_acts_altruists(),
-                     'altruistic_acts_base_agents': model.get_altruistic_acts_base_agents()}, ignore_index=True)
+                     'altruistic_acts_base_agents': model.get_altruistic_acts_base_agents(),
+                     'average_fitness_cost': model.get_average_cost()}, ignore_index=True)
 
         print(df_results[['population_altruists', 'population_nonAltruists', 'population']])
 
@@ -112,13 +113,16 @@ def run_sim(server=False):
             x='year').get_figure()
         fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
         fig_age = df_results[['year', 'median_age']].plot(x='year').get_figure()
-        fig_altruistic_acts = df_results[['year', 'altruistic_acts_altruists', 'altruistic_acts_base_agents']].plot(x='year').get_figure()
+        fig_cost = df_results[['year', 'average_fitness_cost']].plot(x='year').get_figure()
+        fig_altruistic_acts = df_results[['year', 'altruistic_acts_altruists', 'altruistic_acts_base_agents']].plot(
+            x='year').get_figure()
 
         fig_population.savefig('./out/population.png')
         fig_altruist_nonAltruist.savefig('./out/altruist_nonAltruist.png')
         fig_fitness.savefig('./out/fitness.png')
         fig_birthrate.savefig('./out/birthrate.png')
         fig_age.savefig('./out/avg_age.png')
+        fig_cost.savefig('./out/fig_cost.png')
         fig_altruistic_acts.savefig('./out/altruistic_acts.png')
         df_results.to_json("./out/results.json", orient="records")
         get_params(Parameters).to_json("./out/params.json", orient="records")

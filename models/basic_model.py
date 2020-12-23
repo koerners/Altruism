@@ -36,6 +36,8 @@ class ExampleModel(Model):
         self.altruistic_acts_altruists = 0
         self.altruistic_acts_base_agent = 0
 
+        self.average_fitness_cost = []
+
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
         self.grid = MultiGrid(100, 100, True)
@@ -187,3 +189,12 @@ class ExampleModel(Model):
 
     def get_altruistic_acts_base_agents(self):
         return self.altruistic_acts_base_agent
+
+    def get_average_cost(self):
+        if len(self.average_fitness_cost)<1:
+            return 0
+        cost = 0
+        for c in self.average_fitness_cost:
+            cost += c
+
+        return cost / len(self.average_fitness_cost)
