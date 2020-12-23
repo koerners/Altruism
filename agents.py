@@ -130,6 +130,7 @@ class BaseAgent(Agent):
             self.fitness = self.fitness - cost * self.parameters.COST_REDUCTION_ALTRUISTIC_ACT
             needs_help.fitness = needs_help.fitness + cost
             self.model.average_fitness_cost.append(cost)
+            self.model.average_fitness_cost_round.append(cost)
             self.altruistic_acts_agent += 1
 
     def altruism_check(self, needs_help, cost):

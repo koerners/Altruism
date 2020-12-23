@@ -36,6 +36,7 @@ class ExampleModel(Model):
         self.altruistic_acts_altruists = 0
         self.altruistic_acts_base_agent = 0
 
+        self.average_fitness_cost_round = []
         self.average_fitness_cost = []
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
@@ -76,7 +77,7 @@ class ExampleModel(Model):
 
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
-
+        self.average_fitness_cost_round = []
         self.ready_to_mate = []
         self.net_grow = 0
         self.average_age = None
@@ -191,10 +192,19 @@ class ExampleModel(Model):
         return self.altruistic_acts_base_agent
 
     def get_average_cost(self):
-        if len(self.average_fitness_cost)<1:
+        if len(self.average_fitness_cost) < 1:
             return 0
         cost = 0
         for c in self.average_fitness_cost:
             cost += c
 
         return cost / len(self.average_fitness_cost)
+
+    def get_average_fitness_cost_round(self):
+        if len(self.average_fitness_cost_round) < 1:
+            return 0
+        cost = 0
+        for c in self.average_fitness_cost_round:
+            cost += c
+
+        return cost / len(self.average_fitness_cost_round)
