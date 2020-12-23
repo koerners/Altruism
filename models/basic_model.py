@@ -201,7 +201,7 @@ class ExampleModel(Model):
         return self.nonAltruists
 
     def get_altruistic_acts_altruists(self):
-        return self.altruistic_acts_altruists / self.altruists
+        return self.altruistic_acts_altruists / self.altruists if self.altruists > 0 else None
 
     def get_altruistic_acts_base_agents(self):
         return self.altruistic_acts_base_agent / self.normals

@@ -40,75 +40,34 @@ def run_sim(server=False):
 
     from models.basic_model import ExampleModel
 
-    if server:
-        def agent_portrayal(agent):
-            portrayal = {"Shape": "circle",
-                         "Filled": "true",
-                         "Layer": 0,
-                         "Color": "blue",
-                         "r": 0.5}
+    model = ExampleModel(parameters)
 
-            if isinstance(agent, NonAltruist):
-                portrayal["Color"] = "red"
-            if isinstance(agent, Altruist):
-                portrayal["Color"] = "green"
-            return portrayal
-
-        chart = ChartModule([{"Label": "Altruists",
-                              "Color": "Green"}, {"Label": "NonAltruists",
-                                                  "Color": "Red"}],
-                            data_collector_name='datacollector_a_d')
-        chart2 = ChartModule([{"Label": "Fitness",
-                               "Color": "Blue"}, {"Label": "Altruists",
-                                                  "Color": "Green"}, {"Label": "NonAltruists",
-                                                                      "Color": "Red"}],
-                             data_collector_name='datacollector_fitness')
-        chart3 = ChartModule([{"Label": "Birthrate",
-                               "Color": "Blue"}],
-                             data_collector_name='datacollector_birthrate')
-        chart4 = ChartModule([{"Label": "Population",
-                               "Color": "Blue"}],
-                             data_collector_name='datacollector_population')
-
-        grid = CanvasGrid(agent_portrayal, 100, 100, 600, 600)
-
-        params = ParamsElement()
-        server = ModularServer(ExampleModel,
-                               [params, grid, chart, chart2, chart3, chart4],
-                               "Altruism Model",
-                               {"parameters": parameters})
-
-        server.port = 8521  # The default
-        server.launch()
-    else:
-        model = ExampleModel(parameters)
-
-        # Model wird ausgeführt
-        with trange(parameters.NUMBER_OF_ITERATIONS) as t:
-            for i in t:
-                model.step()
-                t.set_description('YEAR %i' % model.get_time())
-                t.set_postfix(population=str(model.schedule.get_agent_count()))
-                df_results = df_results.append(
-                    {'year': model.get_time(), 'population': model.schedule.get_agent_count(),
-                     'median_age': model.get_median_age(),
-                     'median_fitness': model.get_median_fitness(),
-                     'children_per_woman': model.children_per_woman(),
-                     'net_growth': model.get_net_grow(),
-                     'nonAltruist_fitness': model.get_nonAltruist_fitness(),
-                     'altruist_fitness': model.get_altruist_fitness(),
-                     'population_altruists': model.get_altruists(),
-                     'population_nonAltruists': model.get_nonAltruists(),
-                     'altruistic_acts_altruists': model.get_altruistic_acts_altruists(),
-                     'altruistic_acts_base_agents': model.get_altruistic_acts_base_agents(),
-                     'average_fitness_cost': model.get_average_cost(),
-                     'average_fitness_cost_round': model.get_average_fitness_cost_round(),
-                     'fitness_at_death': model.get_all_death_fitness(), 'age_at_death': model.get_all_death_age(),
-                     'died_of_fitness_loss': model.get_died_fitness(),
-                     'died_of_chance': model.get_died_random(),
-                     'died_of_old_age': model.get_died_age()
-                   },
-                    ignore_index=True)
+    # Model wird ausgeführt
+    with trange(parameters.NUMBER_OF_ITERATIONS) as t:
+        for i in t:
+            model.step()
+            t.set_description('YEAR %i' % model.get_time())
+            t.set_postfix(population=str(model.schedule.get_agent_count()))
+            df_results = df_results.append(
+                {'year': model.get_time(), 'population': model.schedule.get_agent_count(),
+                 'median_age': model.get_median_age(),
+                 'median_fitness': model.get_median_fitness(),
+                 'children_per_woman': model.children_per_woman(),
+                 'net_growth': model.get_net_grow(),
+                 'nonAltruist_fitness': model.get_nonAltruist_fitness(),
+                 'altruist_fitness': model.get_altruist_fitness(),
+                 'population_altruists': model.get_altruists(),
+                 'population_nonAltruists': model.get_nonAltruists(),
+                 'altruistic_acts_altruists': model.get_altruistic_acts_altruists(),
+                 'altruistic_acts_base_agents': model.get_altruistic_acts_base_agents(),
+                 'average_fitness_cost': model.get_average_cost(),
+                 'average_fitness_cost_round': model.get_average_fitness_cost_round(),
+                 'fitness_at_death': model.get_all_death_fitness(), 'age_at_death': model.get_all_death_age(),
+                 'died_of_fitness_loss': model.get_died_fitness(),
+                 'died_of_chance': model.get_died_random(),
+                 'died_of_old_age': model.get_died_age()
+               },
+                ignore_index=True)
 
         print(df_results[['population_altruists', 'population_nonAltruists', 'population']])
 
