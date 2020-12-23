@@ -1,15 +1,15 @@
 from mesa import Model
-from mesa.datacollection import DataCollector
 from mesa.space import MultiGrid
 from mesa.time import BaseScheduler
 
-from agents import BaseAgent, Altruist, NonAltruist
+from agents import BaseAgent, Altruist, NonAltruist, DeathCauses
 from main import Parameters
 
 
 class ExampleModel(Model):
     def __init__(self, parameters: Parameters):
         super().__init__()
+        self.normals = 0
         self.schedule = BaseScheduler(self)
         self.ready_to_mate = []
 
@@ -23,21 +23,17 @@ class ExampleModel(Model):
         self.nonAltruists = None
         self.parameters = parameters
         self.population = 0
-        self.datacollector_a_d = DataCollector(
-            model_reporters={"Altruists": "altruists", "NonAltruists": "nonAltruists"})
-        self.datacollector_fitness = DataCollector(
-            model_reporters={"Fitness": "average_fitness", "Altruists": "altruist_fitness",
-                             "NonAltruists": "nonAltruist_fitness"})
-        self.datacollector_birthrate = DataCollector(
-            model_reporters={"Birthrate": "birthrate"})
-        self.datacollector_population = DataCollector(
-            model_reporters={"Population": "population"})
-
         self.altruistic_acts_altruists = 0
         self.altruistic_acts_base_agent = 0
-
         self.average_fitness_cost_round = []
         self.average_fitness_cost = []
+        self.died = []
+        self.died_this_round = []
+        self.died_of_fitness_loss = 0
+        self.died_of_age = 0
+        self.died_of_chance = 0
+        self.age_at_death = 0
+        self.fitness_at_death = 0
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
@@ -78,8 +74,15 @@ class ExampleModel(Model):
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
         self.average_fitness_cost_round = []
+        self.died = []
         self.ready_to_mate = []
         self.net_grow = 0
+        self.died_of_fitness_loss = 0
+        self.died_of_age = 0
+        self.died_of_chance = 0
+        self.age_at_death = 0
+        self.fitness_at_death = 0
+        self.normals = 0
         self.average_age = None
         self.average_fitness = None
         self.nonAltruist_fitness = None
@@ -90,10 +93,6 @@ class ExampleModel(Model):
         self.population = len(self.schedule.agents)
         self.schedule.step()
         self.calculate_statistics()
-        self.datacollector_a_d.collect(self)
-        self.datacollector_fitness.collect(self)
-        self.datacollector_birthrate.collect(self)
-        self.datacollector_population.collect(self)
 
     def calculate_statistics(self):
         """
@@ -120,6 +119,7 @@ class ExampleModel(Model):
                     self.altruistic_acts_altruists += agent.altruistic_acts_agent
 
                 if isinstance(agent, BaseAgent):
+                    self.normals += 1
                     self.altruistic_acts_base_agent += agent.altruistic_acts_agent
                 fitness += agent.fitness
 
@@ -138,6 +138,21 @@ class ExampleModel(Model):
 
             self.nonAltruists = nonAltruists
             self.altruists = altruists
+
+        if len(self.died) > 0:
+            for dead in self.died:
+                if dead.cause_of_death == DeathCauses.FITNESS:
+                    self.died_of_fitness_loss += 1
+                if dead.cause_of_death == DeathCauses.RANDOM:
+                    self.died_of_chance += 1
+                if dead.cause_of_death == DeathCauses.OLD_AGE:
+                    self.died_of_age += 1
+
+                self.age_at_death += dead.age
+                self.fitness_at_death += dead.fitness
+
+            self.fitness_at_death = self.fitness_at_death / len(self.died)
+            self.age_at_death = self.age_at_death / len(self.died)
 
     def get_time(self):
         """
@@ -186,14 +201,14 @@ class ExampleModel(Model):
         return self.nonAltruists
 
     def get_altruistic_acts_altruists(self):
-        return self.altruistic_acts_altruists
+        return self.altruistic_acts_altruists / self.altruists
 
     def get_altruistic_acts_base_agents(self):
-        return self.altruistic_acts_base_agent
+        return self.altruistic_acts_base_agent / self.normals
 
     def get_average_cost(self):
         if len(self.average_fitness_cost) < 1:
-            return 0
+            return None
         cost = 0
         for c in self.average_fitness_cost:
             cost += c
@@ -202,9 +217,24 @@ class ExampleModel(Model):
 
     def get_average_fitness_cost_round(self):
         if len(self.average_fitness_cost_round) < 1:
-            return 0
+            return None
         cost = 0
         for c in self.average_fitness_cost_round:
             cost += c
 
         return cost / len(self.average_fitness_cost_round)
+
+    def get_all_death_fitness(self):
+        return self.fitness_at_death
+
+    def get_all_death_age(self):
+        return self.age_at_death if self.age_at_death > 0 else None
+
+    def get_died_age(self):
+        return self.died_of_age if self.died_of_age > 0 else None
+
+    def get_died_random(self):
+        return self.died_of_chance if self.died_of_chance > 0 else None
+
+    def get_died_fitness(self):
+        return self.died_of_fitness_loss if self.died_of_fitness_loss > 0 else None

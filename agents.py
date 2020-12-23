@@ -1,4 +1,12 @@
+from enum import Enum, auto
+
 from mesa import Agent
+
+
+class DeathCauses(Enum):
+    FITNESS = auto()
+    RANDOM = auto()
+    OLD_AGE = auto()
 
 
 class BaseAgent(Agent):
@@ -17,6 +25,7 @@ class BaseAgent(Agent):
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
         self.altruistic_acts_agent = 0
+        self.cause_of_death = None
 
     def get_neighbours(self):
         neighbors = []
@@ -53,8 +62,19 @@ class BaseAgent(Agent):
         self.fitness = self.fitness + (
                 self.parameters.FITNESS_REGENERATION_RATE / self.age)  # Fitness wird regeneriert. Wirklich gute Idee?
 
-        if self.age > self.life_expectancy or self.fitness < 0 or self.random.randint(0, 1000) < 1:
+        if self.age > self.life_expectancy:
             # Wenn die Lebenserwartung erreicht ist, man Pech hat, oder die Fitness unter 0 sinkt
+            self.cause_of_death = DeathCauses.OLD_AGE
+            self.die()
+
+        elif self.fitness < 0:
+            # Wenn die Lebenserwartung erreicht ist, man Pech hat, oder die Fitness unter 0 sinkt
+            self.cause_of_death = DeathCauses.FITNESS
+            self.die()
+
+        elif self.random.randint(0, 1000) < 1:
+            # Wenn die Lebenserwartung erreicht ist, man Pech hat, oder die Fitness unter 0 sinkt
+            self.cause_of_death = DeathCauses.RANDOM
             self.die()
 
         if 40 > self.age > 18 and (self.random.randint(0, 1000) < (self.parameters.FERTILITY * self.fitness)):
@@ -65,10 +85,11 @@ class BaseAgent(Agent):
     def die(self):
         # Sterben
         self.model.net_grow = self.model.net_grow - 1
+        self.model.died.append(self)
+        self.model.died_this_round.append(self)
         self.model.schedule.remove(self)
         if self.pos is not None:
             self.model.grid.remove_agent(self)
-
 
     def find_partner(self):
         if self.partner is None:
