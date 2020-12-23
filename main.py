@@ -5,7 +5,7 @@ from sim import run_sim
 
 class Parameters:
     NUMBER_OF_AGENTS = 100  # Größe der Anfangs-Population
-    NUMBER_OF_ITERATIONS = 200  # Jahre, welche simuliert werden sollen
+    NUMBER_OF_ITERATIONS = 250  # Jahre, welche simuliert werden sollen
     SPAWN_NONALTRUIST = 10  # Spawn Wahrscheinlichkeit von "NonAltruists" in % -> 5 er Steps
     SPAWN_ALTRUIST = 10  # Spawn Wahrscheinlichkeit von "Altruists" in % -> 5 er Steps
     MUTATION_RATE = 5  # Mutationsrate
@@ -17,7 +17,7 @@ class Parameters:
 
 
 if __name__ == '__main__':
-    batch = False  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
+    batch = True  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
 
     if not batch:
         parameters = Parameters()
