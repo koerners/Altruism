@@ -13,14 +13,14 @@ class ExampleModel(Model):
         self.schedule = BaseScheduler(self)
         self.ready_to_mate = []
 
-        self.net_grow = None
-        self.average_age = None
-        self.average_fitness = None
-        self.nonAltruist_fitness = None
-        self.altruist_fitness = None
-        self.birthrate = None
-        self.altruists = None
-        self.nonAltruists = None
+        self.net_grow = 0
+        self.average_age = 0
+        self.average_fitness = 0
+        self.nonAltruist_fitness = 0
+        self.altruist_fitness = 0
+        self.birthrate = 0
+        self.altruists = 0
+        self.nonAltruists = 0
         self.parameters = parameters
         self.population = 0
         self.altruistic_acts_altruists = 0
@@ -71,6 +71,7 @@ class ExampleModel(Model):
             y = self.random.randrange(self.grid.height)
             self.grid.place_agent(agent, (x, y))
 
+
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
         self.average_fitness_cost_round = []
@@ -83,13 +84,13 @@ class ExampleModel(Model):
         self.age_at_death = 0
         self.fitness_at_death = 0
         self.normals = 0
-        self.average_age = None
-        self.average_fitness = None
-        self.nonAltruist_fitness = None
-        self.altruist_fitness = None
-        self.birthrate = None
-        self.altruists = None
-        self.nonAltruists = None
+        self.average_age = 0
+        self.average_fitness = 0
+        self.nonAltruist_fitness = 0
+        self.altruist_fitness = 0
+        self.birthrate = 0
+        self.altruists = 0
+        self.nonAltruists = 0
         self.population = len(self.schedule.agents)
         self.schedule.step()
         self.calculate_statistics()
@@ -204,7 +205,7 @@ class ExampleModel(Model):
         return self.altruistic_acts_altruists / self.altruists if self.altruists > 0 else None
 
     def get_altruistic_acts_base_agents(self):
-        return self.altruistic_acts_base_agent / self.normals
+        return self.altruistic_acts_base_agent / self.normals if self.normals > 0 else None
 
     def get_average_cost(self):
         if len(self.average_fitness_cost) < 1:
@@ -225,7 +226,7 @@ class ExampleModel(Model):
         return cost / len(self.average_fitness_cost_round)
 
     def get_all_death_fitness(self):
-        return self.fitness_at_death
+        return self.fitness_at_death if self.fitness_at_death != 0 else None
 
     def get_all_death_age(self):
         return self.age_at_death if self.age_at_death > 0 else None
