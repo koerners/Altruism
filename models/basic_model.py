@@ -30,12 +30,14 @@ class ExampleModel(Model):
         self.datacollector_population = DataCollector(
             model_reporters={"Population": "population"})
 
+        self.altruistic_acts_angels = 0
+        self.altruistic_acts_persons = 0
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
         self.grid = MultiGrid(100, 100, True)
 
-        # Initiale Agenten werden altruistegt
+        # Initiale Agenten werden angelegt
         self.initial_agents = []
         i = 0
         while len(self.initial_agents) < self.parameters.NUMBER_OF_AGENTS:
@@ -111,6 +113,10 @@ class ExampleModel(Model):
                 if isinstance(agent, Altruist):
                     altruist_fitness += agent.fitness
                     altruists = altruists + 1
+                    self.altruistic_acts_angels += agent.altruistic_acts_agent
+
+                if isinstance(agent, BaseAgent):
+                    self.altruistic_acts_persons += agent.altruistic_acts_agent
                 fitness += agent.fitness
 
                 if agent.gender == "f":
@@ -174,3 +180,9 @@ class ExampleModel(Model):
 
     def get_nonAltruists(self):
         return self.nonAltruists
+
+    def get_altruistic_acts_angels(self):
+        return self.altruistic_acts_angels
+
+    def get_altruistic_acts_persons(self):
+        return self.altruistic_acts_persons

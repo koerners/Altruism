@@ -16,7 +16,7 @@ class BaseAgent(Agent):
         self.parents = []  # Die eigenen Eltern
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
-        self.hadChildThisTick = False
+        self.altruistic_acts_agent = altruistic_acts_agent
 
     def get_neighbours(self):
         neighbors = []
@@ -68,6 +68,7 @@ class BaseAgent(Agent):
         self.model.schedule.remove(self)
         if self.pos is not None:
             self.model.grid.remove_agent(self)
+
 
     def find_partner(self):
         if self.partner is None:
@@ -123,11 +124,12 @@ class BaseAgent(Agent):
         if len(self.model.schedule.agents) < 2:
             return
 
-        needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige BaseAgent
+        needs_help = self.random.choice(self.model.schedule.agents)  # Hilfsbedürtige Person
         cost = self.random.randint(1, 10)  # Kosten für einen selbst
         if self.altruism_check(needs_help, cost) and self != needs_help:
             self.fitness = self.fitness - cost * self.parameters.COST_REDUCTION_ALTRUISTIC_ACT
             needs_help.fitness = needs_help.fitness + cost
+            self.altruistic_acts_agent += 1
 
     def altruism_check(self, needs_help, cost):
         """
