@@ -1,10 +1,12 @@
-from mesa import Model, Agent
+from mesa import Model
 from mesa.datacollection import DataCollector
-from mesa.time import RandomActivation, BaseScheduler
+from mesa.space import MultiGrid
+from mesa.time import BaseScheduler
 
 from agents import BaseAgent, Altruist, NonAltruist
 from main import Parameters
-from mesa.space import MultiGrid
+
+
 class ExampleModel(Model):
     def __init__(self, parameters: Parameters):
         super().__init__()
@@ -24,14 +26,15 @@ class ExampleModel(Model):
         self.datacollector_a_d = DataCollector(
             model_reporters={"Altruists": "altruists", "NonAltruists": "nonAltruists"})
         self.datacollector_fitness = DataCollector(
-            model_reporters={"Fitness": "average_fitness", "Altruists": "altruist_fitness", "NonAltruists": "nonAltruist_fitness"})
+            model_reporters={"Fitness": "average_fitness", "Altruists": "altruist_fitness",
+                             "NonAltruists": "nonAltruist_fitness"})
         self.datacollector_birthrate = DataCollector(
             model_reporters={"Birthrate": "birthrate"})
         self.datacollector_population = DataCollector(
             model_reporters={"Population": "population"})
 
-        self.altruistic_acts_angels = 0
-        self.altruistic_acts_persons = 0
+        self.altruistic_acts_altruists = 0
+        self.altruistic_acts_base_agent = 0
 
         self.reset_randomizer(seed=self.parameters.SEED)  # Zufallsseed
 
@@ -89,8 +92,6 @@ class ExampleModel(Model):
         self.datacollector_birthrate.collect(self)
         self.datacollector_population.collect(self)
 
-
-
     def calculate_statistics(self):
         """
         Etwas unschöne Methode um Statistiken zu sammeln aber sonst müsste man die Agenten Liste sehr häufig durchgehen...
@@ -113,10 +114,10 @@ class ExampleModel(Model):
                 if isinstance(agent, Altruist):
                     altruist_fitness += agent.fitness
                     altruists = altruists + 1
-                    self.altruistic_acts_angels += agent.altruistic_acts_agent
+                    self.altruistic_acts_altruists += agent.altruistic_acts_agent
 
                 if isinstance(agent, BaseAgent):
-                    self.altruistic_acts_persons += agent.altruistic_acts_agent
+                    self.altruistic_acts_base_agent += agent.altruistic_acts_agent
                 fitness += agent.fitness
 
                 if agent.gender == "f":
@@ -181,8 +182,8 @@ class ExampleModel(Model):
     def get_nonAltruists(self):
         return self.nonAltruists
 
-    def get_altruistic_acts_angels(self):
-        return self.altruistic_acts_angels
+    def get_altruistic_acts_altruists(self):
+        return self.altruistic_acts_altruists
 
-    def get_altruistic_acts_persons(self):
-        return self.altruistic_acts_persons
+    def get_altruistic_acts_base_agents(self):
+        return self.altruistic_acts_base_agent

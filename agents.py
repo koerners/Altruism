@@ -16,7 +16,7 @@ class BaseAgent(Agent):
         self.parents = []  # Die eigenen Eltern
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
-        self.altruistic_acts_agent = altruistic_acts_agent
+        self.altruistic_acts_agent = 0
 
     def get_neighbours(self):
         neighbors = []
