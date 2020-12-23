@@ -40,7 +40,7 @@ class BaseAgent(Agent):
         if self.pos is not None:
             self.move()
         self.life_cycle()
-        if self.random.randint(0, 1000) < self.parameters.DISASTER_PROBABILITY * 10:
+        if self.random.randint(0, 1000) < self.parameters.CHANCE_TO_HELP_PROBABILITY * 10:
             # Zufällig wird die Option gegeben altruistisch zu handeln
             self.altruistic_act()
 
