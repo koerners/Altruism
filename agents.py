@@ -16,6 +16,7 @@ class BaseAgent(Agent):
         self.parents = []  # Die eigenen Eltern
         self.fitness = fitness  # Fitness Wert u.a. für Fortpflanzung
         self.parameters = self.model.parameters
+        self.hadChildThisTick = False
 
     def get_neighbours(self):
         neighbors = []
@@ -68,15 +69,12 @@ class BaseAgent(Agent):
         if self.pos is not None:
             self.model.grid.remove_agent(self)
 
-
     def find_partner(self):
         if self.partner is None:
             # Wahl des Partners aus dem Partnerpool
             self.model.ready_to_mate.append(self)
-            # TODO: Partner mit ähnlicher Fitness und evtl Alter
             for potential_partner in self.model.ready_to_mate:
-                #if potential_partner.gender != self.gender:
-                if potential_partner != self:
+                if potential_partner.gender != self.gender:
                     self.partner = potential_partner
                     potential_partner.partner = self
                     self.model.ready_to_mate.remove(self)
@@ -104,21 +102,14 @@ class BaseAgent(Agent):
         Vererbungsstrategie NonAltruist / Altruist / "Normal"
         :return: Child
         """
-        # To DO: Mutation einbauen
-        """
-        if self.fitness > self.partner.fitness:
-            stronger = self
-        else:
-            stronger = self.partner
-        """
-
         if self.random.randint(0, 100) <= self.parameters.MUTATION_RATE:
             trait_to_inherit = self.random.choice([Altruist, NonAltruist, BaseAgent])
         else:
             trait_to_inherit = self.random.choice([self, self.partner])
 
         if isinstance(trait_to_inherit, NonAltruist):
-            return NonAltruist(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
+            return NonAltruist(self.model.next_id(), self.model, age=0,
+                               fitness=(self.fitness + self.partner.fitness) / 2)
         if isinstance(trait_to_inherit, Altruist):
             return Altruist(self.model.next_id(), self.model, age=0, fitness=(self.fitness + self.partner.fitness) / 2)
 
@@ -145,7 +136,6 @@ class BaseAgent(Agent):
         :param cost: Kosten
         :return: True oder False
         """
-        # TODO: Sinnvolle Implementierung basierend z.B. auf dem Verwandschaftsgrad
 
         return self.random.choice([True, False])
 

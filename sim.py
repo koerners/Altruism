@@ -11,9 +11,7 @@ matplotlib.use('Agg')  # Fix für SSH
 
 class ParamsElement(TextElement):
     def __init__(self):
-
         super().__init__()
-
 
     def render(self, model):
         from main import Parameters
@@ -58,7 +56,7 @@ def run_sim(server=False):
 
         chart = ChartModule([{"Label": "Altruists",
                               "Color": "Green"}, {"Label": "NonAltruists",
-                                                 "Color": "Red"}],
+                                                  "Color": "Red"}],
                             data_collector_name='datacollector_a_d')
         chart2 = ChartModule([{"Label": "Fitness",
                                "Color": "Blue"}, {"Label": "Altruists",
