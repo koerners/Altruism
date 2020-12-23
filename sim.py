@@ -28,7 +28,7 @@ def get_params(input_class):
     return pd.DataFrame(attrs, index=[0])
 
 
-def run_sim(id_, parameters=None):
+def run_sim(id_, parameters=None, no_img=False):
     if parameters is None:
         from main import Parameters
         parameters = Parameters()
@@ -73,39 +73,41 @@ def run_sim(id_, parameters=None):
                  },
                 ignore_index=True)
 
-        fig_population = df_results[['year', 'population', 'population_altruists', 'population_nonAltruists']].plot(
-            x='year').get_figure()
-        fig_altruist_nonAltruist = df_results[['year', 'population_altruists', 'population_nonAltruists']].plot(
-            x='year').get_figure()
-        fig_fitness = df_results[['year', 'nonAltruist_fitness', 'altruist_fitness', 'median_fitness']].plot(
-            x='year').get_figure()
-        fig_fitness_death = df_results[['year', 'median_fitness', 'fitness_at_death']].plot(
-            x='year').get_figure()
-        fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
-        fig_age = df_results[['year', 'median_age', 'age_at_death']].plot(x='year').get_figure()
-        fig_cost = df_results[['year', 'average_fitness_cost_round', 'average_fitness_cost']].plot(
-            x='year').get_figure()
-        fig_altruistic_acts = df_results[['year', 'altruistic_acts_altruists', 'altruistic_acts_base_agents']].plot(
-            x='year').get_figure()
+        if not no_img:
+            fig_population = df_results[['year', 'population', 'population_altruists', 'population_nonAltruists']].plot(
+                x='year').get_figure()
+            fig_altruist_nonAltruist = df_results[['year', 'population_altruists', 'population_nonAltruists']].plot(
+                x='year').get_figure()
+            fig_fitness = df_results[['year', 'nonAltruist_fitness', 'altruist_fitness', 'median_fitness']].plot(
+                x='year').get_figure()
+            fig_fitness_death = df_results[['year', 'median_fitness', 'fitness_at_death']].plot(
+                x='year').get_figure()
+            fig_birthrate = df_results[['year', 'children_per_woman']].plot(x='year').get_figure()
+            fig_age = df_results[['year', 'median_age', 'age_at_death']].plot(x='year').get_figure()
+            fig_cost = df_results[['year', 'average_fitness_cost_round', 'average_fitness_cost']].plot(
+                x='year').get_figure()
+            fig_altruistic_acts = df_results[['year', 'altruistic_acts_altruists', 'altruistic_acts_base_agents']].plot(
+                x='year').get_figure()
 
-        fig_cause_of_death = df_results[['year', 'died_of_fitness_loss', 'died_of_chance', 'died_of_old_age']].plot(
-            x='year').get_figure()
+            fig_cause_of_death = df_results[['year', 'died_of_fitness_loss', 'died_of_chance', 'died_of_old_age']].plot(
+                x='year').get_figure()
 
-        directory = "./out/" + str(id_) + "/"
-        from pathlib import Path
-        Path(directory).mkdir(parents=True, exist_ok=True)
+            directory = "./out/" + str(id_) + "/"
+            from pathlib import Path
+            Path(directory).mkdir(parents=True, exist_ok=True)
 
-        fig_population.savefig(directory + 'population.png')
-        fig_altruist_nonAltruist.savefig(directory + 'altruist_nonAltruist.png')
-        fig_fitness.savefig(directory + 'fitness.png')
-        fig_birthrate.savefig(directory + 'birthrate.png')
-        fig_fitness_death.savefig(directory + 'fig_fitness_death.png')
-        fig_age.savefig(directory + 'avg_age.png')
-        fig_cost.savefig(directory + 'fig_cost.png')
-        fig_altruistic_acts.savefig(directory + 'altruistic_acts.png')
-        fig_cause_of_death.savefig(directory + 'fig_cause_of_death.png')
-        df_results.iloc[[-1]].to_json(directory + "results.json", orient="records")
-        # get_params(Parameters).to_json(directory + "params.json", orient="records")
-        matplotlib.pyplot.close('all')
+            fig_population.savefig(directory + 'population.png')
+            fig_altruist_nonAltruist.savefig(directory + 'altruist_nonAltruist.png')
+            fig_fitness.savefig(directory + 'fitness.png')
+            fig_birthrate.savefig(directory + 'birthrate.png')
+            fig_fitness_death.savefig(directory + 'fig_fitness_death.png')
+            fig_age.savefig(directory + 'avg_age.png')
+            fig_cost.savefig(directory + 'fig_cost.png')
+            fig_altruistic_acts.savefig(directory + 'altruistic_acts.png')
+            fig_cause_of_death.savefig(directory + 'fig_cause_of_death.png')
+            df_results.iloc[[-1]].to_json(directory + "results.json", orient="records")
+            # get_params(Parameters).to_json(directory + "params.json", orient="records")
+            matplotlib.pyplot.close('all')
+
         df_results.iloc[-1, df_results.columns.get_loc('ID')] = id_
         return df_results.iloc[[-1]]

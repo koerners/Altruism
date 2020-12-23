@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 setattr(param, "SEED", seed)
                 try:
                     print(id_, "von", len(params), seed)
-                    sim_df = run_sim(id_, param).round(2)
+                    sim_df = run_sim(id_, param, no_img=True).round(2) # Mit no_img = False wird ein Graph pro Runde generiert
                     df_results = df_results.append(sim_df)
                     df_results.to_csv("./out/results.csv", sep=";")
                 except Exception as e:
