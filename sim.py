@@ -1,20 +1,8 @@
 import matplotlib
 import pandas as pd
-from mesa.visualization.modules import TextElement
 from tqdm import trange
 
 matplotlib.use('Agg')  # Fix für SSH
-
-
-class ParamsElement(TextElement):
-    def __init__(self):
-        super().__init__()
-
-    def render(self, model):
-        from main import Parameters
-        params = get_params(Parameters)
-
-        return params.T.to_html()
 
 
 def get_params(input_class):
@@ -29,10 +17,6 @@ def get_params(input_class):
 
 
 def run_sim(id_, parameters=None, no_img=False):
-    if parameters is None:
-        from main import Parameters
-        parameters = Parameters()
-
     df_results = pd.DataFrame(columns=['ID'])  # Data Frame, in dem die Ergebisse kummuliert werden
 
     from models.basic_model import ExampleModel

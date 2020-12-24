@@ -71,7 +71,6 @@ class ExampleModel(Model):
             y = self.random.randrange(self.grid.height)
             self.grid.place_agent(agent, (x, y))
 
-
     def step(self):
         # Schritt, der jeden "Tick" ausgeführt wird
         self.average_fitness_cost_round = []
