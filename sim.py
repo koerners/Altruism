@@ -92,7 +92,7 @@ def run_sim(id_, parameters=None, no_img=False):
             fig_cause_of_death = df_results[['year', 'died_of_fitness_loss', 'died_of_chance', 'died_of_old_age']].plot(
                 x='year').get_figure()
 
-            directory = "./out/" + str(id_) + "/"
+            directory = "./out/" + str(id_) + "-" + str(parameters.SEED) + "/"
             from pathlib import Path
             Path(directory).mkdir(parents=True, exist_ok=True)
 
