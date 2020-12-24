@@ -16,9 +16,9 @@ class Parameters:
 
 
 if __name__ == '__main__':
-    batch = True  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
+    BATCH = True  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
 
-    if not batch:
+    if not BATCH:
         parameters = Parameters()
         print(run_sim(0, parameters))
 
