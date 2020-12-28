@@ -1,5 +1,6 @@
 import pandas as pd
 from sim import run_sim
+import itertools
 
 
 class Parameters:
@@ -14,9 +15,15 @@ class Parameters:
     COST_REDUCTION_ALTRUISTIC_ACT = 1  # Anteil der Punkte, welche man selbst verliert wenn man altruistisch handelt
     SEED = 545654  # Zufallsseed, gleichlassen für Vergleichbarkeit
 
+    def __init__(self, permutation_list):
+        self.SPAWN_NONALTRUIST = permutation_list[0]
+        self.SPAWN_ALTRUIST = permutation_list[1]
+        self.CHANCE_TO_HELP_PROBABILITY = permutation_list[2]
+        self.COST_REDUCTION_ALTRUISTIC_ACT = permutation_list[3]
+
 
 if __name__ == '__main__':
-    BATCH = False  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
+    BATCH = True  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
 
     if not BATCH:
         parameters = Parameters()
@@ -33,26 +40,30 @@ if __name__ == '__main__':
 
         df_results = pd.DataFrame()
         df_batch = pd.read_csv("batch_parameters.csv", sep=";")
-        for col in df_batch:
-            parameters = Parameters()
-            if col != "ID":
-                for index, value in df_batch[col].items():
-                    if not pd.isnull(value):
-                        setattr(parameters, col, float(value))
-                        for col_ in df_batch:
-                            if col_ != "ID" and col_ != col:
-                                for index_, value_ in df_batch[col_].items():
-                                    if not pd.isnull(value_):
-                                        setattr(parameters, col_, float(value_))
-                                        params.append(parameters)
-                                        parameters = Parameters()
+        # print(str(df_batch))
 
-        for id_, param in enumerate(params):
+        batch_test = df_batch.copy().drop(columns = ['ID'])
+        # batch_test = batch_test.values.tolist()
+        param_list_dirty = [] # dirty means the parameters including Nan values
+        param_list = [] # the final list, cleaned without the Nans
+        param_list_dirty.append(batch_test['SPAWN_NONALTRUIST'].values.tolist())
+        param_list_dirty.append(batch_test['SPAWN_ALTRUIST'].values.tolist())
+        param_list_dirty.append(batch_test['CHANCE_TO_HELP_PROBABILITY'].values.tolist())
+        param_list_dirty.append(batch_test['COST_REDUCTION_ALTRUISTIC_ACT'].values.tolist())
+        for param_list_current in param_list_dirty:
+            param_list.append([x for x in param_list_current if str(x) != 'nan'])
+        # print(str(param_list))
+        params_permutations = list(itertools.product(*param_list))
+
+        for id_, permutation in enumerate(params_permutations):
+            # print("current Permutation: " + str(permutation))
+            params = Parameters(permutation)
+
             for seed in seeds:
-                setattr(param, "SEED", seed)
+                setattr(params, "SEED", seed)
                 try:
-                    print(id_, "von", len(params), seed)
-                    sim_df = run_sim(id_, param, no_img=True).round(2) # Mit no_img = False wird ein Graph pro Runde generiert
+                    print(id_, "von", len(params_permutations), seed)
+                    sim_df = run_sim(id_, params, no_img=True).round(2) # Mit no_img = False wird ein Graph pro Runde generiert
                     df_results = df_results.append(sim_df)
                     df_results.to_csv("./out/results.csv", sep=";")
                 except Exception as e:
