@@ -1,6 +1,9 @@
-import pandas as pd
-from sim import run_sim
 import itertools
+import multiprocessing as mp
+
+import pandas as pd
+
+from sim import run_sim
 
 
 class Parameters:
@@ -22,6 +25,23 @@ class Parameters:
         self.COST_REDUCTION_ALTRUISTIC_ACT = permutation_list[3]
 
 
+class Payload:
+    def __init__(self, params, id):
+        self.params = params
+        self.id = id
+
+
+def run(pl):
+    try:
+        print(pl.id, mp.current_process())
+        sim_df = run_sim(pl.id, pl.params, no_img=True).round(
+            2)  # Mit no_img = False wird ein Graph pro Runde generiert
+        return sim_df
+
+    except Exception as e:
+        print(e)
+
+
 if __name__ == '__main__':
     BATCH = True  # Wenn True werden die Parameter oben genutzt, Sonst werden die Parameter aus batch_parameter.csv eingelesen und überschreiben oben
 
@@ -40,31 +60,32 @@ if __name__ == '__main__':
 
         df_results = pd.DataFrame()
         df_batch = pd.read_csv("batch_parameters.csv", sep=";")
-        # print(str(df_batch))
 
-        batch_test = df_batch.copy().drop(columns = ['ID'])
+        batch_test = df_batch.copy().drop(columns=['ID'])
         # batch_test = batch_test.values.tolist()
-        param_list_dirty = [] # dirty means the parameters including Nan values
-        param_list = [] # the final list, cleaned without the Nans
+        param_list_dirty = []  # dirty means the parameters including Nan values
+        param_list = []  # the final list, cleaned without the Nans
         param_list_dirty.append(batch_test['SPAWN_NONALTRUIST'].values.tolist())
         param_list_dirty.append(batch_test['SPAWN_ALTRUIST'].values.tolist())
         param_list_dirty.append(batch_test['CHANCE_TO_HELP_PROBABILITY'].values.tolist())
         param_list_dirty.append(batch_test['COST_REDUCTION_ALTRUISTIC_ACT'].values.tolist())
+
         for param_list_current in param_list_dirty:
             param_list.append([x for x in param_list_current if str(x) != 'nan'])
         # print(str(param_list))
         params_permutations = list(itertools.product(*param_list))
-
+        myparams = []
         for id_, permutation in enumerate(params_permutations):
-            # print("current Permutation: " + str(permutation))
             params = Parameters(permutation)
-
             for seed in seeds:
                 setattr(params, "SEED", seed)
-                try:
-                    print(id_, "von", len(params_permutations), seed)
-                    sim_df = run_sim(id_, params, no_img=True).round(2) # Mit no_img = False wird ein Graph pro Runde generiert
-                    df_results = df_results.append(sim_df)
-                    df_results.to_csv("./out/results.csv", sep=";")
-                except Exception as e:
-                    print(e)
+                myparams.append(Payload(params, id_))
+
+        pool = mp.Pool(mp.cpu_count())
+        result = pool.map(run, myparams)
+        pool.terminate()
+
+        for res in result:
+            df_results = df_results.append(res)
+
+        df_results.to_csv("./out/results.csv", sep=";")
