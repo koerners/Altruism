@@ -76,6 +76,7 @@ if __name__ == '__main__':
                 final_params.append(params)
 
         pool = mp.Pool(mp.cpu_count())
+        print("Running", len(final_params), "iterations")
         result = pool.map(run, final_params)
         pool.terminate()
 
