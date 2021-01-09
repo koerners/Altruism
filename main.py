@@ -17,24 +17,20 @@ class Parameters:
     FERTILITY = 2  # Fruchtbarkeitsrate
     COST_REDUCTION_ALTRUISTIC_ACT = 1  # Anteil der Punkte, welche man selbst verliert wenn man altruistisch handelt
     SEED = 545654  # Zufallsseed, gleichlassen für Vergleichbarkeit
+    ID = None
 
-    def __init__(self, permutation_list):
-        self.SPAWN_NONALTRUIST = permutation_list[0]
-        self.SPAWN_ALTRUIST = permutation_list[1]
-        self.CHANCE_TO_HELP_PROBABILITY = permutation_list[2]
-        self.COST_REDUCTION_ALTRUISTIC_ACT = permutation_list[3]
-
-
-class Payload:
-    def __init__(self, params, id):
-        self.params = params
-        self.id = id
+    def __init__(self, permutation_list=None, id_=None):
+        if id_ is not None:
+            self.SPAWN_NONALTRUIST = permutation_list[0]
+            self.SPAWN_ALTRUIST = permutation_list[1]
+            self.CHANCE_TO_HELP_PROBABILITY = permutation_list[2]
+            self.COST_REDUCTION_ALTRUISTIC_ACT = permutation_list[3]
+            self.ID = id_
 
 
 def run(pl):
     try:
-        print(pl.id, mp.current_process())
-        sim_df = run_sim(pl.id, pl.params, no_img=True).round(
+        sim_df = run_sim(pl.ID, pl, no_img=True).round(
             2)  # Mit no_img = False wird ein Graph pro Runde generiert
         return sim_df
 
@@ -62,27 +58,25 @@ if __name__ == '__main__':
         df_batch = pd.read_csv("batch_parameters.csv", sep=";")
 
         batch_test = df_batch.copy().drop(columns=['ID'])
-        # batch_test = batch_test.values.tolist()
         param_list_dirty = []  # dirty means the parameters including Nan values
         param_list = []  # the final list, cleaned without the Nans
-        param_list_dirty.append(batch_test['SPAWN_NONALTRUIST'].values.tolist())
-        param_list_dirty.append(batch_test['SPAWN_ALTRUIST'].values.tolist())
-        param_list_dirty.append(batch_test['CHANCE_TO_HELP_PROBABILITY'].values.tolist())
-        param_list_dirty.append(batch_test['COST_REDUCTION_ALTRUISTIC_ACT'].values.tolist())
+        for column in ['SPAWN_NONALTRUIST', 'SPAWN_ALTRUIST', 'CHANCE_TO_HELP_PROBABILITY',
+                       'COST_REDUCTION_ALTRUISTIC_ACT']:
+            param_list_dirty.append(batch_test[column].values.tolist())
 
         for param_list_current in param_list_dirty:
             param_list.append([x for x in param_list_current if str(x) != 'nan'])
-        # print(str(param_list))
         params_permutations = list(itertools.product(*param_list))
-        myparams = []
+
+        final_params = []
         for id_, permutation in enumerate(params_permutations):
-            params = Parameters(permutation)
+            params = Parameters(permutation, id_)
             for seed in seeds:
                 setattr(params, "SEED", seed)
-                myparams.append(Payload(params, id_))
+                final_params.append(params)
 
         pool = mp.Pool(mp.cpu_count())
-        result = pool.map(run, myparams)
+        result = pool.map(run, final_params)
         pool.terminate()
 
         for res in result:
