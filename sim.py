@@ -92,6 +92,5 @@ def run_sim(id_, parameters=None, no_img=False):
             df_results.iloc[[-1]].to_json(directory + "results.json", orient="records")
             # get_params(Parameters).to_json(directory + "params.json", orient="records")
             matplotlib.pyplot.close('all')
-
         df_results.iloc[-1, df_results.columns.get_loc('ID')] = id_
         return df_results.iloc[[-1]]

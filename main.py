@@ -8,7 +8,7 @@ from sim import run_sim
 
 class Parameters:
     NUMBER_OF_AGENTS = 100  # Größe der Anfangs-Population
-    NUMBER_OF_ITERATIONS = 250  # Jahre, welche simuliert werden sollen
+    NUMBER_OF_ITERATIONS = 200  # Jahre, welche simuliert werden sollen
     SPAWN_NONALTRUIST = 10  # Spawn Wahrscheinlichkeit von "NonAltruists" in % -> 5 er Steps
     SPAWN_ALTRUIST = 10  # Spawn Wahrscheinlichkeit von "Altruists" in % -> 5 er Steps
     MUTATION_RATE = 5  # Mutationsrate
@@ -30,6 +30,7 @@ class Parameters:
 
 def run(pl):
     try:
+        print("\n Running: ", pl.ID)
         sim_df = run_sim(pl.ID, pl, no_img=True).round(
             2)  # Mit no_img = False wird ein Graph pro Runde generiert
         return sim_df
@@ -70,9 +71,9 @@ if __name__ == '__main__':
 
         final_params = []
         for id_, permutation in enumerate(params_permutations):
-            params = Parameters(permutation, id_)
             for seed in seeds:
-                setattr(params, "SEED", seed)
+                params = Parameters(permutation, id_)
+                params.SEED = seed
                 final_params.append(params)
 
         pool = mp.Pool(mp.cpu_count())

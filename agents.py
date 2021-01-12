@@ -107,7 +107,7 @@ class BaseAgent(Agent):
         """
         Ein Kind wird gezeugt und der Simulation hinzugefügt
         """
-        if len(self.model.schedule.agents) > 20000:
+        if len(self.model.schedule.agents) > 25000:
             return
         if self.partner is not None:
             if self.gender == "f":
